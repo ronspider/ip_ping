@@ -6,6 +6,7 @@ from openpyxl import Workbook
 sub_ran_min = 130
 sub_ran_max = 140
 ip_add = "10.10.61."
+ip_add_str = "10.10.61" + str(sub_ran_min) + "-" + str(sub_ran_max)
 
 sub_range = [x for x in range(sub_ran_min,sub_ran_max)]
 
@@ -14,11 +15,6 @@ ws = wb.active
 
 ws.title = "IP scan" + ip_add + str(sub_ran_min) + "-" + str(sub_ran_max)
 
-ws['A1'] = "Timestamp"
-ws['B1'] = "IP Address"
-ws['C1'] = "Reached"
-ws['D1'] = "Time"
-
 
 def write_to_file(line):
     print(line)
@@ -26,11 +22,15 @@ def write_to_file(line):
         the_file.write(line + '\n')
 
 def to_xlsx(count, time, ipadd, reach, took):
-    ws.cell(count,1).value = now
+    ws.cell(count,1).value = time
     ws.cell(count,2).value = ipadd
     ws.cell(count,3).value = reach
     ws.cell(count,4).value = took
     wb.save("myworkbook.xlsx")
+
+# Set up the work sheet header
+to_xlsx(1,"Timestamp","IP Address","Reached YES/NO","Time in sec")
+
 
 row_write = 2
 reach = "No"
