@@ -2,7 +2,7 @@ from ping3 import ping, verbose_ping
 
 
 sub_ran_min = 0
-sub_ran_max = 20
+sub_ran_max = 150
 ip_add = "192.168.12."
 
 sub_range = [x for x in range(sub_ran_min,sub_ran_max)]
