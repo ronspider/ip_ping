@@ -1,8 +1,6 @@
 from ping3 import ping, verbose_ping
-from datetime import datetime
 import openpyxl
 from IPy import IP
-'''https://pypi.org/project/ping3/'''
 
 # Function
 def ip_scan(search_ip):
@@ -28,6 +26,7 @@ wb_source = openpyxl.load_workbook(file_name)
 worksheet = wb_source.active
 
 # Define scan range/rows in the file to open
+# for testing use a shorter range
 scan_range = worksheet.max_row + 1
 # scan_range = 15
 
