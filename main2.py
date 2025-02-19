@@ -1,71 +1,94 @@
+#!/bin/env python
+
 from ping3 import ping # verbose_ping
 import openpyxl
 from IPy import IP
 from datetime import datetime
 
 
-# Get Dates
-now_date = datetime.today().strftime('%Y%m%d')
-now_date_iso = datetime.today().strftime('%Y-%m-%d')
-
-
-# Get Time
+# Get ISO Date_Time 
 def get_time():
-    return datetime.today().strftime('%H:%M:%S')
+    return datetime.today().strftime('%Y%m%d_%H%M%S')
 
 
 def ip_scan(search_ip):
-    result = ping(search_ip)
-    result_type = type(result)
     try:
         IP(search_ip)
+        result = ping(search_ip)
+        result_type = type(result)
+        
         if result_type == type(None):
-            print("no")
-            return "no"
+            print(result_type, "timed out")
+            return "timed out"
 
-        elif result_type is not bool:
-            print(f"{round(result,5)} sec")
-            return f"{round(result,5)} s"
+        elif result_type == float:
+            print(result_type, result,"seconds")
+            return round(result,11)
 
-        else:
-            return f"no"
+        elif result_type == bool:
+            print(result_type, "unknown")
+            return "unknown"
+
     except:
-        print("no ip")
-        return "no ip"
+        print("no ip address")
+        return "no ip address"
 
 
-# Open source workbook
-# wb = woorkbook, ws = worksheet
+# Open source workbook: wb = woorkbook, ws = worksheet
 file_source = "current_ip_log.xlsx"
 wb_source = openpyxl.load_workbook(file_source)
 ws_source = wb_source.active
 
 # Define scan range/rows in the file to open
 # for testing use a shorter range
-# scan_range = ws_source.max_row + 1
-scan_range = 15
+scan_range = ws_source.max_row + 1
+# scan_range = 20
+
+# Start time
+start_time = get_time()
+print(f"Started at {start_time}")
 
 # Header information for new columns
-result_header_1 = f"IP Scan Time on {now_date_iso}"
-result_header_2 = "Response time"
-ws_source["P1"].value = result_header_1
-ws_source["Q1"].value = result_header_2
+ws_source["P1"].value = f"Last scan started {start_time}"
+ws_source["Q1"].value = "Response [time in sec]"
 
-# Loop over the rows read Col C and write results to Col P
+
+
+# Loop over the rows read Col C and update Col Q and P
+# IF ip_scan returns a float AND Col Q is float OR Col Q is a none float
+# OR ip_scan returns a none float AND Col Q is a none float
+# ELSE Col P and Q will not be updated and will retain the last time and result
 for row in range(2,scan_range):
+
     for column in "C":
-        cell_name = "{}{}".format(column,row)
-        string_ip = str(ws_source[cell_name].value)
+        cell_col_C = "{}{}".format(column,row)
+        string_ip = str(ws_source[cell_col_C].value)
         print(f"Scanning... {string_ip}")
         cell_result = ip_scan(string_ip)
-        
-        for column in "P":
-            new_cell_name_1 = "{}{}".format(column,row)
-            ws_source[new_cell_name_1].value = get_time()
-        
-        for column in "Q":
-            new_cell_name_2 = "{}{}".format(column,row)
-            ws_source[new_cell_name_2].value = cell_result
-           
-# Save current workbook in a copy
-wb_source.save(f"{now_date}_{file_source}")
+        if type(cell_result) == float:
+            for column in "P":
+                cell_col_P = "{}{}".format(column,row)
+                ws_source[cell_col_P].value = get_time()
+            for column in "Q":
+                cell_col_Q = "{}{}".format(column,row)
+                ws_source[cell_col_Q].value = cell_result
+        elif type(cell_result) != float:
+            for column in "Q":
+                cell_col_Q = "{}{}".format(column,row)
+                cell_value_Q = ws_source[cell_col_Q].value
+                try: # check 
+                    cell_value_float = float(cell_value_Q)
+                    continue
+                except:
+                    for column in "P":
+                        cell_col_P = "{}{}".format(column,row)
+                        ws_source[cell_col_P].value = get_time()
+                    for column in "Q":
+                        cell_col_Q = "{}{}".format(column,row)
+                        ws_source[cell_col_Q].value = cell_result
+
+# Save current workbook and a copy with start time stamp
+wb_source.save(file_source)
+wb_source.save(f"{start_time}_{file_source}")
+print("Saved")
+print(f"Finished at {get_time()}")
