@@ -7,9 +7,12 @@ from datetime import datetime
 
 
 # Get ISO Date_Time 
-def get_time():
-    return datetime.today().strftime('%Y%m%d_%H%M%S')
-
+def get_time(form):
+    if form == "dt":
+        return_value =datetime.today().strftime('%Y%m%d_%H%M%S')
+    if form == "d":
+        return_value = datetime.today().strftime('%Y%m%d')
+    return return_value
 
 def ip_scan(search_ip):
     try:
@@ -45,7 +48,7 @@ scan_range = ws_source.max_row + 1
 # scan_range = 20
 
 # Start time
-start_time = get_time()
+start_time = get_time("dt")
 print(f"Started at {start_time}")
 
 # Header information for new columns
@@ -68,7 +71,7 @@ for row in range(2,scan_range):
         if type(cell_result) == float:
             for column in "P":
                 cell_col_P = "{}{}".format(column,row)
-                ws_source[cell_col_P].value = get_time()
+                ws_source[cell_col_P].value = get_time("dt")
             for column in "Q":
                 cell_col_Q = "{}{}".format(column,row)
                 ws_source[cell_col_Q].value = cell_result
@@ -82,13 +85,18 @@ for row in range(2,scan_range):
                 except:
                     for column in "P":
                         cell_col_P = "{}{}".format(column,row)
-                        ws_source[cell_col_P].value = get_time()
+                        ws_source[cell_col_P].value = get_time("dt")
                     for column in "Q":
                         cell_col_Q = "{}{}".format(column,row)
                         ws_source[cell_col_Q].value = cell_result
+    
+    # Write results into a log file
+    with open(f'{get_time("d")}_ip_scan_log.txt', 'a') as the_file:
+        the_file.write(f"{string_ip}, {ws_source[cell_col_P].value}, {ws_source[cell_col_Q].value} \n")
 
 # Save current workbook and a copy with start time stamp
 wb_source.save(file_source)
-wb_source.save(f"{start_time}_{file_source}")
+
+# wb_source.save(f"{start_time}_{file_source}")
 print("Saved")
-print(f"Finished at {get_time()}")
+print(f"Finished at {get_time("dt")}")
