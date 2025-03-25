@@ -54,12 +54,12 @@ ws_source = wb_source.active
 
 # Define scan range/rows in the file to open
 # for testing use a shorter range
-scan_range = ws_source.max_row + 1
-# scan_range = 20
+# scan_range = ws_source.max_row + 1
+scan_range = 20
 
 # Start time
-start_time = get_time("dt")
-print(f"Started at {start_time}")
+start_time = get_time("t")
+# print(f"Started at {start_time}")
 
 # Header information for new columns
 ws_source["P1"].value = f"Last scan started {start_time}"
@@ -108,5 +108,6 @@ for row in range(2,scan_range):
 wb_source.save(file_source)
 
 # wb_source.save(f"{start_time}_{file_source}")
+print(f"Started {start_time}")
 print("Saved")
 # print(f"Finished at {get_time("dt")}")
